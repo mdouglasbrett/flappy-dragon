@@ -37,8 +37,15 @@ impl Obstacle {
 
         // Bottom half of obstacle
         for y in self.gap_y + half_size..SCREEN_HEIGHT {
-ctx.set(screen_x, y, RED, BLACK, to_cp437('|'));
+            ctx.set(screen_x, y, RED, BLACK, to_cp437('|'));
         }
+    }
+    fn hit_obstacle(&self, player: &Player) -> bool {
+        let half_size = self.size / 2;
+        let does_x_match = player.x == self.x;
+        let player_above_gap = player.y < self.gap_y - half_size;
+        let player_below_gap = player.y > self.gap_y + half_size;
+        does_x_match && (player_above_gap || player_below_gap)
     }
 }
 
@@ -77,7 +84,9 @@ impl Player {
 struct State {
     player: Player,
     frame_time: f32,
+    obstacle: Obstacle,
     mode: GameMode,
+    score: i32,
 }
 
 impl State {
@@ -85,7 +94,9 @@ impl State {
         State {
             player: Player::new(5, 25),
             frame_time: 0.0,
+            obstacle: Obstacle::new(SCREEN_WIDTH, 0),
             mode: GameMode::Menu,
+            score: 0,
         }
     }
     fn play(&mut self, ctx: &mut BTerm) {
